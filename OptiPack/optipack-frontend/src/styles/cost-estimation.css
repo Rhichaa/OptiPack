@@ -1,0 +1,137 @@
+.cost-page-wrapper {
+  padding: 24px 32px;
+}
+
+.cost-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cost-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.cost-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+.cost-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  padding: 18px 20px;
+}
+
+.cost-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.cost-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.cost-field label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #4b5563;
+}
+
+.cost-input,
+.cost-select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.cost-input:focus,
+.cost-select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.18);
+}
+
+.cost-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cost-btn-outline {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.cost-btn-primary {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #4f46e5;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Result box */
+
+.cost-result-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+  padding: 18px 20px;
+}
+
+.cost-result-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.cost-result-box {
+  border-radius: 10px;
+  border: 1px dashed #d1d5db;
+  padding: 16px 14px;
+  background: #f9fafb;
+  font-size: 14px;
+}
+
+.cost-result-value {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cost-note {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .cost-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cost-page-wrapper {
+    padding: 16px;
+  }
+}

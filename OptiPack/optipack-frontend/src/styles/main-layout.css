@@ -1,0 +1,102 @@
+/* Layout grid: sidebar + main */
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: var(--bg-body);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  border-right: 1px solid var(--border-subtle);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo / brand */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.sidebar-logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-logo-text {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+/* Nav links */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1; /* pushes footer to bottom */
+}
+
+.sidebar-link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+}
+
+.sidebar-link-active,
+.sidebar-link:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* User footer pinned at bottom */
+.sidebar-footer {
+  margin-top: auto; /* pushes footer to bottom */
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.sidebar-user-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sidebar-user-email {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* MAIN CONTENT */
+.main-content {
+  padding: 24px 32px 32px;
+  background: var(--bg-body);
+  overflow-y: auto;
+}
