@@ -46,32 +46,27 @@ function Dashboard() {
       {/* Quick Actions */}
       <h2 className="quick-title">Quick Actions</h2>
       <div className="quick-grid">
-        <Link to="/product-details" className="quick-card">
+        <Link to="/app/product-details" className="quick-card">
           <div className="quick-card-icon">📦</div>
           <div className="quick-card-label">Product Details</div>
         </Link>
 
-        <Link to="/recommendations" className="quick-card">
+        <Link to="/app/Manual-Entry" className="quick-card">
           <div className="quick-card-icon">💡</div>
-          <div className="quick-card-label">Recommendation</div>
+          <div className="quick-card-label">Manual Entry</div>
         </Link>
 
-        <Link to="/cost-estimation" className="quick-card">
-          <div className="quick-card-icon">🧮</div>
-          <div className="quick-card-label">Cost Estimation</div>
-        </Link>
-
-        <Link to="/inventory" className="quick-card">
+        <Link to="/app/inventory" className="quick-card">
           <div className="quick-card-icon">📚</div>
           <div className="quick-card-label">Inventory</div>
         </Link>
 
-        <Link to="/history" className="quick-card">
+        <Link to="/app/history" className="quick-card">
           <div className="quick-card-icon">🕒</div>
           <div className="quick-card-label">History</div>
         </Link>
 
-        <Link to="/user-profile" className="quick-card">
+        <Link to="/app/user-profile" className="quick-card">
           <div className="quick-card-icon">👤</div>
           <div className="quick-card-label">User Profile</div>
         </Link>

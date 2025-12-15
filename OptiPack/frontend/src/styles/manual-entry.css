@@ -1,0 +1,154 @@
+.manual-page-wrapper {
+  padding: 20px 30px;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+.manual-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.manual-page-title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.manual-back {
+  font-size: 14px;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.manual-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 20px;
+}
+
+.manual-card {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.manual-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.manual-field {
+  margin-bottom: 14px;
+}
+
+.manual-label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.manual-input,
+.manual-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.manual-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-outline {
+  padding: 8px 14px;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn-primary {
+  padding: 8px 14px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-save {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.manual-option {
+  border: 1px solid #e5e7eb;
+  padding: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  background: #fafafa;
+}
+
+.manual-option.selected {
+  border-color: #2563eb;
+  background: #e0ecff;
+}
+
+.manual-tag {
+  background: #dbeafe;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.cost-card {
+  margin-top: 20px;
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  width: 420px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.cost-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.cost-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.reco-back-btn {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  font-size: 14px;
+  cursor: pointer;
+  margin: 10px 0 0 20px;
+}

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OptiPackBackend.DTOs;
+using OptiPackBackend.Models;
 using OptiPackBackend.Services.Interfaces;
 using System.Threading.Tasks;
 
@@ -13,11 +14,17 @@ namespace OptiPackBackend.Controllers
         private readonly IProductService _product;
         public ProductController(IProductService product) { _product = product; }
 
-        [HttpPost("upload-image")]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile image)
+        [HttpPost("upload")]
+        public async Task<IActionResult> UploadImage([FromForm] ProductUploadRequest request)
         {
-            var result = await _product.ProcessImageAndCreateProductAsync(image);
-            return Ok(result);
+
+            var file = request.ImageFile;
+
+            if (file == null || file.Length == 0)
+                return BadRequest("No file uploaded");
+
+
+            return Ok("File uploaded");
         }
 
         [HttpGet("{id}")]

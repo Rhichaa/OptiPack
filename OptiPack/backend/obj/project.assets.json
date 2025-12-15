@@ -4197,23 +4197,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\KAVIYA T\\.nuget\\packages\\": {},
+    "C:\\Users\\Dell\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\KAVIYA T\\OneDrive\\Desktop\\OptiPackBackend\\OptiPackBackend.csproj",
+      "projectUniqueName": "C:\\Users\\Dell\\Documents\\ups projects\\OptiPackBackend\\OptiPack\\backend\\OptiPackBackend.csproj",
       "projectName": "OptiPackBackend",
-      "projectPath": "C:\\Users\\KAVIYA T\\OneDrive\\Desktop\\OptiPackBackend\\OptiPackBackend.csproj",
-      "packagesPath": "C:\\Users\\KAVIYA T\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\KAVIYA T\\OneDrive\\Desktop\\OptiPackBackend\\obj\\",
+      "projectPath": "C:\\Users\\Dell\\Documents\\ups projects\\OptiPackBackend\\OptiPack\\backend\\OptiPackBackend.csproj",
+      "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Dell\\Documents\\ups projects\\OptiPackBackend\\OptiPack\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\KAVIYA T\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4222,6 +4222,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4294,7 +4295,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

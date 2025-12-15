@@ -31,10 +31,7 @@ function Sidebar() {
             <span>Recommendations</span>
           </Link>
 
-          <Link to="/cost-estimation" className={isActive("/cost-estimation")}>
-            <span className="sidebar-item-icon">🧮</span>
-            <span>Cost Estimation</span>
-          </Link>
+          
 
           <Link to="/inventory" className={isActive("/inventory")}>
             <span className="sidebar-item-icon">📚</span>

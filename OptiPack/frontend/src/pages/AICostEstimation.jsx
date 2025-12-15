@@ -36,13 +36,13 @@ function AICostEstimation() {
     data.costs.shipping;
 
   function handleBack() {
-    navigate("/recommendations"); // or "/product-details" if you prefer
+    navigate("/app/Manual-Entry"); // or "/product-details" if you prefer
   }
 
   function handleConfirm() {
     // later: send final cost & config to backend
     alert("Packaging cost saved (demo).");
-    navigate("/dashboard");
+    navigate("/app");
   }
 
   return (
@@ -151,11 +151,9 @@ function AICostEstimation() {
 
       {/* Footer Buttons */}
       <div className="ai-footer-actions">
-        <button className="ai-secondary-btn" onClick={handleBack}>
-          Back to Recommendation
-        </button>
+        
         <button className="ai-primary-btn" onClick={handleConfirm}>
-          Confirm &amp; Save Packaging Cost
+          Confirm &amp; Save 
         </button>
       </div>
     </div>

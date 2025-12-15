@@ -9,7 +9,7 @@ function ManualOverride() {
     e.preventDefault();
     // later: send this data to backend
     alert("Manual override saved. (You can now go to cost estimation.)");
-    navigate("/cost-estimation");
+    navigate("/app/cost-estimation");
   }
 
   return (

@@ -17,54 +17,84 @@ namespace OptiPackBackend.Services.Implementations
             _db = db;
         }
 
-        public async Task<RecommendationResultDto> RecommendAsync(RecommendationRequestDto request)
+        public async Task<RecommendationResultDto> RecommendAsync(Product product)
         {
-            // Get product
-            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == request.ProductId);
-            if (product == null) throw new System.Exception("Product not found");
+           
 
-            // Simple logic (STUB) — choose first box that fits
-            var volume = product.LengthCm * product.WidthCm * product.HeightCm;
+            // 2. Find suitable box (rule-based AI logic)
             var candidateBox = await _db.Boxes
-                .Where(b => b.LengthCm >= product.LengthCm && b.WidthCm >= product.WidthCm && b.HeightCm >= product.HeightCm && b.MaxWeightKg >= product.WeightKg)
+                .Where(b =>
+                    b.LengthCm >= product.LengthCm &&
+                    b.WidthCm >= product.WidthCm &&
+                    b.HeightCm >= product.HeightCm &&
+                    b.MaxWeightKg >= product.WeightKg)
                 .OrderBy(b => b.CostPerBox)
                 .FirstOrDefaultAsync();
 
-            // If AI model is used, replace above with ML model call:
-            // var mlResult = _aiModel.Predict(...);
+            string recommendedBox = candidateBox != null
+                ? candidateBox.BoxId
+                : "CUSTOM_BOX";
 
-            string boxDesc = candidateBox != null ? candidateBox.BoxId : "CUSTOM_BOX";
-            // Protective materials (simple rule)
-            string prot = product.FragilityLevel switch
+            // 3. Protective materials + layers (based on fragility)
+            string protectiveMaterial;
+            int packagingLayers;
+            decimal damageRiskScore;
+            int aiConfidenceScore;
+
+            switch (product.FragilityLevel)
             {
-                "High" => "BubbleWrap:3, Foam:1",
-                "Low" => "BubbleWrap:1",
-                _ => "BubbleWrap:2"
-            };
+                case "High":
+                    protectiveMaterial = "Bubble Wrap + Foam";
+                    packagingLayers = 3;
+                    damageRiskScore = 5.0m;   // %
+                    aiConfidenceScore = 92;
+                    break;
 
-            // Vehicle suggestion based on size & weight (your extra)
-            string vehicle = (product.WeightKg > 20 || product.HeightCm > 100) ? "Truck" :
-                             (product.WeightKg > 5) ? "Van" : "Two-wheeler";
+                case "Medium":
+                    protectiveMaterial = "Bubble Wrap";
+                    packagingLayers = 2;
+                    damageRiskScore = 10.0m;  // %
+                    aiConfidenceScore = 85;
+                    break;
 
+                default:
+                    protectiveMaterial = "Paper Cushioning";
+                    packagingLayers = 1;
+                    damageRiskScore = 3.0m;   // %
+                    aiConfidenceScore = 90;
+                    break;
+            }
+
+            // 4. Vehicle recommendation (based on size & weight)
+            string vehicle = (product.WeightKg > 20 || product.HeightCm > 100)
+                ? "Truck"
+                : (product.WeightKg > 5)
+                    ? "Van"
+                    : "Two-Wheeler";
+
+            // 5. Prepare response DTO (what frontend needs)
             var result = new RecommendationResultDto
             {
-                RecommendedBox = boxDesc,
-                ProtectiveMaterials = prot,
-                Confidence = 0.85m, // placeholder
-                RiskPercent = product.FragilityLevel == "High" ? 5m : 1.5m,
+                RecommendedBox = recommendedBox,
+                ProtectiveMaterials = protectiveMaterial,
+                PackagingLayers = packagingLayers,
+                DamageRiskScore = damageRiskScore,
+                AiConfidenceScore = aiConfidenceScore,
                 VehicleType = vehicle
             };
 
-            // optionally save recommendation history
+            // 6. Save recommendation history (optional but GOOD)
             var rec = new Recommendation
             {
-                ProductId = product.Id,
+                ProductId = product.Id>0?product.Id:null,
                 BoxId = candidateBox?.Id ?? 0,
-                ProtectiveMaterials = prot,
-                Confidence = result.Confidence,
-                PredictedRiskPercent = result.RiskPercent,
+                ProtectiveMaterials = protectiveMaterial,
+                PackagingLayers = packagingLayers,
+                PredictedRiskPercent = damageRiskScore,
+                Confidence = aiConfidenceScore / 100m,
                 VehicleType = vehicle
             };
+
             _db.Recommendations.Add(rec);
             await _db.SaveChangesAsync();
 

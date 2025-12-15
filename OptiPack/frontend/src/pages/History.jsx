@@ -60,7 +60,6 @@ function History() {
   const records = [
     {
       datetime: "2023-10-26 10:30 AM",
-      sku: "SKU001",
       product: "Wireless Bluetooth Earbuds",
       box: "Box Type A (Small)",
       material: "Bubble Wrap",
@@ -71,7 +70,6 @@ function History() {
     },
     {
       datetime: "2023-10-26 11:15 AM",
-      sku: "SKU002",
       product: "4K Ultra HD Smart TV 55 inch",
       box: "Box Type D (Large)",
       material: "Foam Inserts",
@@ -82,7 +80,6 @@ function History() {
     },
     {
       datetime: "2023-10-26 01:00 PM",
-      sku: "SKU003",
       product: "Portable SSD 1TB USB-C",
       box: "Mailer Envelope",
       material: "None",
@@ -93,7 +90,6 @@ function History() {
     },
     {
       datetime: "2023-10-26 02:30 PM",
-      sku: "SKU004",
       product: "Ergonomic Office Chair Deluxe",
       box: "Custom Box (Oversized)",
       material: "Cardboard Dividers",
@@ -104,7 +100,6 @@ function History() {
     },
     {
       datetime: "2023-10-26 03:30 PM",
-      sku: "SKU005",
       product: "Espresso Machine Pro",
       box: "Box Type C (Medium)",
       material: "Compostable Peanuts",
@@ -259,7 +254,6 @@ function History() {
             <thead>
               <tr>
                 <th>Date &amp; Time</th>
-                <th>SKU Code</th>
                 <th>Product Name</th>
                 <th>Box Used</th>
                 <th>Protective Material Used</th>
@@ -273,7 +267,6 @@ function History() {
               {records.map((r, idx) => (
                 <tr key={idx}>
                   <td>{r.datetime}</td>
-                  <td>{r.sku}</td>
                   <td>{r.product}</td>
                   <td>{r.box}</td>
                   <td>{r.material}</td>

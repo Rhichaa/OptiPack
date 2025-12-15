@@ -2,12 +2,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OptiPackBackend.Data;
+using OptiPackBackend.Services;
 using OptiPackBackend.Services.Implementations;
 using OptiPackBackend.Services.Interfaces;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+builder.Services.AddHttpClient();
 
 // Add DbContext (MS SQL)
 // connection string in appsettings.json: "DefaultConnection"
@@ -20,6 +23,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
+builder.Services.AddScoped<ProductMatchService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -52,12 +56,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-app.UseSwagger();
-app.UseSwaggerUI();
 
+app.UseDeveloperExceptionPage();
+//app.UseSwagger();
+//app.UseSwaggerUI();
+app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

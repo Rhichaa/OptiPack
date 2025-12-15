@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import "../styles/auth.css";
+import axios from "axios";
 
 function Signup() {
   const navigate = useNavigate();
@@ -24,14 +25,16 @@ function Signup() {
     }
 
     try {
-      const res = await api.post("/auth/register", {
-        fullname,
-        email,
-        username,
-        password: password, // IMPORTANT → matches backend
-        avatarUrl: "",
-        role: "User",
+      const res = await axios.post("https://localhost:49331/api/Auth/register", {
+          fullname,
+          email,
+          username,
+          password,
+          avatarUrl: "",
+          role: "User",
       });
+
+
 
       if (res.status === 200) {
         alert("Registration successful!");

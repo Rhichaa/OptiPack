@@ -4,6 +4,7 @@ import "../styles/inventory.css";
 function Inventory() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [showModal, setShowModal] = useState(false);
 
   // Sample packaging inventory data (boxes, foam, wraps, etc.)
   const items = [
@@ -14,7 +15,7 @@ function Inventory() {
       dimensions: "20 × 15 × 10 cm",
       maxWeight: "5 kg",
       stock: 150,
-      cost: "$0.50",
+      cost: "0.50",
       status: "In Stock",
     },
     {
@@ -24,7 +25,7 @@ function Inventory() {
       dimensions: "30 × 20 × 15 cm",
       maxWeight: "10 kg",
       stock: 50,
-      cost: "$0.80",
+      cost: "0.80",
       status: "Low Stock",
     },
     {
@@ -34,7 +35,7 @@ function Inventory() {
       dimensions: "45 × 30 × 25 cm",
       maxWeight: "15 kg",
       stock: 10,
-      cost: "$1.20",
+      cost: "1.20",
       status: "Low Stock",
     },
     {
@@ -44,7 +45,7 @@ function Inventory() {
       dimensions: "50 × 50 cm (pack)",
       maxWeight: "-",
       stock: 30,
-      cost: "$0.30",
+      cost: "0.30",
       status: "In Stock",
     },
     {
@@ -54,7 +55,7 @@ function Inventory() {
       dimensions: "100 m × 50 cm",
       maxWeight: "-",
       stock: 0,
-      cost: "$0.65",
+      cost: "0.65",
       status: "Out of Stock",
     },
     {
@@ -64,7 +65,7 @@ function Inventory() {
       dimensions: "50 m × 5 cm",
       maxWeight: "-",
       stock: 80,
-      cost: "$0.25",
+      cost: "0.25",
       status: "In Stock",
     },
   ];
@@ -175,7 +176,10 @@ function Inventory() {
                 <option value="Out of Stock">Out of Stock</option>
               </select>
 
-              <button className="inv-add-btn">+ Add New Material</button>
+              <button className="inv-add-btn" onClick={() => setShowModal(true)}>
+  + Add New Material
+</button>
+
             </div>
           </div>
 
@@ -189,7 +193,7 @@ function Inventory() {
                   <th>Dimensions</th>
                   <th>Max Weight</th>
                   <th>Stock</th>
-                  <th>Cost / Unit</th>
+                  <th>Cost</th>
                   <th>Status</th>
                   <th style={{ textAlign: "center" }}>Actions</th>
                 </tr>
@@ -242,6 +246,25 @@ function Inventory() {
             </table>
           </div>
         </section>
+        {showModal && (
+          <div className="modal-overlay">
+            <div className="modal">
+              <h2>Add New Material</h2>
+
+              <input type="text" placeholder="Material Name" />
+              <input type="text" placeholder="Type (Box, Foam, Wrap…)" />
+              <input type="text" placeholder="Dimensions" />
+              <input type="text" placeholder="Max Weight" />
+              <input type="number" placeholder="Stock" />
+              <input type="text" placeholder="Cost" />
+
+              <div className="modal-actions">
+                <button onClick={() => setShowModal(false)} className="cancel-btn">Cancel</button>
+                <button className="save-btn">Save</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ namespace OptiPackBackend.Data
         public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
        //ublic DbSet<PackageHistory> PackageHistories => Set<PackageHistory>();
        public DbSet<PackageHistory> PackageHistories { get; set; }
+       public DbSet<ProductMaster> ProductMaster { get; set; }
 
         public DbSet<Recommendation> Recommendations => Set<Recommendation>();
 

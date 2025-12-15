@@ -40,7 +40,7 @@ function Packages() {
 
   // Next Step
   const handleNext = () => {
-    navigate("/product-analysis");
+    navigate("/app/product-analysis");
   };
 
   return (

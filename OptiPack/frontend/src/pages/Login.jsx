@@ -1,68 +1,18 @@
-// import { useState } from "react";
-// import { useNavigate, Link } from "react-router-dom";
-// import api from "../services/api";
-
-// function Login() {
-//   const navigate = useNavigate();
-//   const [form, setForm] = useState({ username: "", password: "" });
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setForm((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setError("");
-
-//     if (!form.username || !form.password) {
-//       setError("Please enter username and password.");
-//       return;
-//     }
-
-//     setLoading(true);
-
-//     try {
-//       const response = await api.post("/auth/login", {
-//         username: form.username,
-//         password: form.password,
-//       });
-
-//       // Save token
-//       localStorage.setItem("user", JSON.stringify(response.data));
-
-//       // localStorage.setItem("token", response.data.token);
-
-//       // Navigate to dashboard
-//       navigate("/");
-//     } catch (err) {
-//       if (err.response) {
-//         setError(err.response.data.message || "Invalid username or password");
-//       } else {
-//         setError("Server not reachable");
-//       }
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/api";
+import axios from "axios";
 
 function Login() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // FIX: Handle input change properly
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -71,29 +21,36 @@ function Login() {
     e.preventDefault();
     setError("");
 
-    if (!form.username || !form.password) {
-      setError("Please enter username and password.");
+    if (!form.email || !form.password) {
+      setError("Please enter email and password.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/login", {
-        username: form.username,
+      console.log("Trying to login...");
+
+      const res = await axios.post("https://localhost:49331/api/Auth/login", {
+        email: form.email,
         password: form.password,
       });
 
-      // Save user (no token returned from backend)
-      localStorage.setItem("user", JSON.stringify(response.data));
+      console.log("Login success:", res.data);
 
-      navigate("/");
+      localStorage.setItem("token", res.data.token);
+
+      navigate("/app");
     } catch (err) {
-      if (err.response) {
-        setError(err.response.data.message || "Invalid username or password");
-      } else {
-        setError("Server not reachable");
-      }
+      console.error(err);
+
+      // Prevent React crash:
+      const backendMsg =
+        err.response?.data?.title ||
+        err.response?.data ||
+        "Invalid credentials";
+
+      setError(backendMsg.toString());
     } finally {
       setLoading(false);
     }
@@ -121,20 +78,17 @@ function Login() {
         <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>
           Login
         </h1>
-        <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
-          Login with your username and password.
-        </p>
 
         <form onSubmit={handleSubmit}>
-          {/* Username */}
+          {/* Email */}
           <div style={{ marginBottom: 10 }}>
-            <label style={{ fontSize: 13 }}>Username</label>
+            <label style={{ fontSize: 13 }}>Email</label>
             <input
-              type="text"
-              name="username"
-              value={form.username}
+              type="email"
+              name="email"
+              value={form.email}
               onChange={handleChange}
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               style={{
                 width: "100%",
                 padding: "8px 10px",
@@ -170,7 +124,6 @@ function Login() {
             </p>
           )}
 
-          {/* Button */}
           <button
             type="submit"
             disabled={loading}
@@ -190,18 +143,15 @@ function Login() {
           </button>
         </form>
 
-        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
-          <Link
-            to="/forgot-password"
-            style={{ color: "#4f46e5", textDecoration: "none" }}
-          >
+        <div style={{ fontSize: 12, marginTop: 4 }}>
+          <Link to="/forgot-password" style={{ color: "#4f46e5" }}>
             Forgot password?
           </Link>
         </div>
 
-        <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+        <div style={{ fontSize: 12, marginTop: 6 }}>
           New user?{" "}
-          <Link to="/signup" style={{ color: "#4f46e5", textDecoration: "none" }}>
+          <Link to="/signup" style={{ color: "#4f46e5" }}>
             Create an account
           </Link>
         </div>
@@ -211,3 +161,10 @@ function Login() {
 }
 
 export default Login;
+
+
+
+
+
+
+

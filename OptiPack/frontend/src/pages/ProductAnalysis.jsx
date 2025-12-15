@@ -5,7 +5,7 @@ function ProductAnalysis() {
   const navigate = useNavigate();
 
   const handleNext = () => {
-    navigate("/recommendations");
+    navigate("/app/Manual-Entry");
   };
 
   return (

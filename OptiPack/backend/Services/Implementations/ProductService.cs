@@ -9,7 +9,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace OptiPackBackend.Services.Implementations
+namespace OptiPackBackend.Services
 {
     public class ProductService : IProductService
     {

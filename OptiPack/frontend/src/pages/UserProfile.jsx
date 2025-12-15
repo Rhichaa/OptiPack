@@ -41,29 +41,6 @@ function UserProfile() {
           <span className="info-value">April 24, 2024 at 09:00 AM</span>
         </div>
       </div>
-
-      {/* CHANGE PASSWORD */}
-      <div className="section-card">
-        <h3 className="section-title">Change Password</h3>
-
-        <input
-          type="password"
-          className="input-field"
-          placeholder="Enter current password"
-        />
-        <input
-          type="password"
-          className="input-field"
-          placeholder="Enter new password"
-        />
-        <input
-          type="password"
-          className="input-field"
-          placeholder="Confirm new password"
-        />
-
-        <button className="update-password-btn">Update Password</button>
-      </div>
     </div>
   );
 }
