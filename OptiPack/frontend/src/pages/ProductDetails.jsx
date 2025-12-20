@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/product-details.css";
 
-const CV_API = "http://localhost:49331/api";
+// Ensure this matches your Python terminal address exactly
+const CV_API = "http://127.0.0.1:5001/analyze";
 
 function ProductDetails() {
   const [file, setFile] = useState(null);
@@ -18,74 +19,80 @@ function ProductDetails() {
     setFile(selected);
     setPreviewName(selected.name);
     setError("");
+    setProduct(null); // Reset previous results when new file is picked
   }
 
   async function handleAnalyze() {
     if (!file) {
-      setError("Please select a product image first.");
+      setError("Please select an image first.");
       return;
     }
 
     setIsAnalyzing(true);
     setError("");
+    console.log("--- AI Analysis Started ---");
 
     try {
-      // 1️⃣ SEND IMAGE TO CV BACKEND
       const formData = new FormData();
       formData.append("image", file);
 
+      // We use 127.0.0.1 instead of localhost to avoid IPv6 resolution issues
       const response = await fetch(CV_API, {
         method: "POST",
         body: formData,
+        mode: "cors", // Explicitly enable CORS
       });
 
       if (!response.ok) {
-        throw new Error("Image analysis failed");
+        const errorText = await response.text();
+        throw new Error(`Server Error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-
-      /**
-       * Backend response structure:
-       * {
-       *   detected,
-       *   dbMatchedProduct,
-       *   recommendation
-       * }
-       */
+      console.log("Backend Response Received:", data);
 
       const db = data.dbMatchedProduct;
       const rec = data.recommendation;
 
-      // 2️⃣ SET FINAL PRODUCT STATE
+      // Map backend response to the frontend UI state
       setProduct({
-        name: db.productName,
-        quantity: 1,
-        dimensions: $`{db.lengthCm}cm x ${db.widthCm}cm x ${db.heightCm}cm`,
-        weight: $`{db.weightKg} kg`,
-        fragility: db.fragilityLevel,
-        category: db.category,
-
+        name: db ? db.productName : data.label,
+        category: db ? db.category : "General",
+        weight: db ? `${db.weightKg} kg` : "1.0 kg",
+        dimensions: db ? `${db.lengthCm} x ${db.widthCm} x ${db.heightCm} cm` : "20 x 10 x 8 cm",
+        fragility: db ? db.fragilityLevel : "Medium",
+        
         recommendedBox: rec.recommendedBox,
         protectiveMaterial: rec.protectiveMaterials,
         vehicle: rec.vehicleType,
         layers: rec.packagingLayers,
-        damageRisk: $`{rec.damageRiskScore}%`,
-        confidence: $`{rec.aiConfidenceScore}%`,
+        damageRisk: `${rec.damageRiskScore}%`,
+        confidence: `${rec.aiConfidenceScore}%`,
       });
+
+      console.log("UI Updated with Product Data");
+
     } catch (err) {
-      console.error(err);
-      setError("AI analysis failed. Please try again.");
+      console.error("Fetch Error:", err);
+      setError(`Connection failed: ${err.message}. Ensure your Python backend is running on Port 5001.`);
     } finally {
       setIsAnalyzing(false);
     }
   }
 
   function handleGoToCost() {
+    if (!product) {
+      setError("Product data missing. Please analyze again.");
+      return;
+    }
     navigate("/app/ai-cost-estimation", { state: { product } });
   }
 
   function handleOverride() {
+    if (!product) {
+      setError("Product data missing. Please analyze again.");
+      return;
+    }
     navigate("/app/manual-override", { state: { product } });
   }
 
@@ -117,12 +124,12 @@ function ProductDetails() {
             />
           </label>
 
-          {error && <p className="pd-error">{error}</p>}
+          {error && <p className="pd-error" style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
 
           <button
             className="btn-primary pd-analyze-btn"
             onClick={handleAnalyze}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || !file}
           >
             {isAnalyzing ? "Analyzing with AI..." : "Analyze Product Image"}
           </button>

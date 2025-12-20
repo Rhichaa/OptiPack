@@ -1,21 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
 import "../styles/ai-cost-estimation.css";
-
-const DEFAULT_DATA = {
-  productName: "Smartwatch X-Pro",
-  sku: "SWX-P-001",
-  quantity: 50,
-  selectedBox: "Standard Carton (10×10×8 inches)",
-  boxVisual: "View Image",
-  protectiveMaterial: "Bubble Wrap (2 layers)",
-  materialVisual: "View Image",
-  costs: {
-    box: 2500,
-    protective: 1250,
-    labor: 750,
-    shipping: 1500,
-  },
-};
 
 function formatINR(value) {
   return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -24,71 +9,109 @@ function formatINR(value) {
 function AICostEstimation() {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // if ProductDetails passed product data through state, you can use it here
+  const [inventory, setInventory] = useState([]);
+  
+  // New state for dynamic quantity
+  const [quantity, setQuantity] = useState(1);
+  
+  // 1. Get the real AI product data from ProductDetails
   const stateProduct = location.state?.product;
-  const data = DEFAULT_DATA; // for now static; later you can merge with stateProduct
 
-  const total =
-    data.costs.box +
-    data.costs.protective +
-    data.costs.labor +
-    data.costs.shipping;
+  // 2. Fetch Inventory for live pricing
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const response = await fetch("https://localhost:49331/api/inventory");
+        if (response.ok) {
+          const data = await response.json();
+          setInventory(data);
+        }
+      } catch (error) {
+        console.error("Error fetching inventory for pricing:", error);
+      }
+    };
+    fetchInventory();
+  }, []);
 
-  function handleBack() {
-    navigate("/app/Manual-Entry"); // or "/product-details" if you prefer
-  }
+  // 3. Logic to match AI recommendations with Inventory costs
+  const calculation = useMemo(() => {
+    if (!stateProduct || inventory.length === 0) return null;
 
-  function handleConfirm() {
-    // later: send final cost & config to backend
-    alert("Packaging cost saved (demo).");
-    navigate("/app");
+    // Match recommendation name with inventory materialName
+    const boxItem = inventory.find(i => 
+      i.materialName.toLowerCase() === stateProduct.recommendedBox.toLowerCase()
+    );
+
+    const materialItem = inventory.find(i => 
+      i.materialName.toLowerCase() === stateProduct.protectiveMaterial.toLowerCase()
+    );
+
+    const boxUnitPrice = boxItem ? boxItem.cost : 0;
+    const materialUnitPrice = materialItem ? materialItem.cost : 0;
+    
+    // Calculate totals based on the dynamic quantity state
+    const boxTotal = boxUnitPrice * quantity;
+    const materialTotal = materialUnitPrice * quantity;
+    const labor = 15 * quantity; // Assuming ₹15 labor per unit
+    const shipping = 50 * quantity; // Assuming ₹50 shipping per unit
+
+    return {
+      boxCost: boxTotal,
+      protectiveCost: materialTotal,
+      laborCost: labor,
+      shippingCost: shipping,
+      total: boxTotal + materialTotal + labor + shipping
+    };
+  }, [stateProduct, inventory, quantity]); // recalculates when quantity changes
+
+  if (!stateProduct) {
+    return <div className="ai-cost-page"><h2>No product data found. Please analyze an image first.</h2></div>;
   }
 
   return (
     <div className="ai-cost-page">
       <div className="ai-cost-header-row">
         <h1 className="ai-cost-title">Cost Estimation</h1>
-        <button className="ai-cost-back-link" onClick={() => navigate("/dashboard")}>
-          ← Back to Dashboard
+        <button className="ai-cost-back-link" onClick={() => navigate("/app/product-details")}>
+          ← Back to Analysis
         </button>
       </div>
 
       {/* Product & Packaging Summary */}
       <section className="ai-card ai-summary-card">
         <h2 className="ai-section-title">Product &amp; Packaging Summary</h2>
-
         <div className="ai-summary-grid">
           <div className="ai-summary-col">
             <div className="ai-summary-item">
               <span>Product Name:</span>
-              <strong>{data.productName}</strong>
+              <strong>{stateProduct.name}</strong>
             </div>
             <div className="ai-summary-item">
-              <span>SKU Code:</span>
-              <strong>{data.sku}</strong>
+              <span>Dimensions:</span>
+              <strong>{stateProduct.dimensions}</strong>
             </div>
+            {/* NEW QUANTITY INPUT FIELD */}
             <div className="ai-summary-item">
-              <span>Quantity:</span>
-              <strong>{data.quantity} units</strong>
+              <span>Quantity to Pack:</span>
+              <input 
+                type="number" 
+                min="1" 
+                value={quantity} 
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                className="ai-quantity-input"
+                style={{ width: '80px', marginLeft: '10px', padding: '4px' }}
+              />
             </div>
           </div>
 
           <div className="ai-summary-col">
             <div className="ai-summary-item">
               <span>Selected Box:</span>
-              <strong>{data.selectedBox}</strong>
-            </div>
-            <div className="ai-summary-item">
-              <span>Box Visual:</span>
-              <button className="ai-link-button">{data.boxVisual}</button>
+              <strong>{stateProduct.recommendedBox}</strong>
             </div>
             <div className="ai-summary-item">
               <span>Protective Material:</span>
-              <strong>{data.protectiveMaterial}</strong>
-              <button className="ai-link-button ai-link-inline">
-                {data.materialVisual}
-              </button>
+              <strong>{stateProduct.protectiveMaterial}</strong>
             </div>
           </div>
         </div>
@@ -97,63 +120,43 @@ function AICostEstimation() {
       {/* Cost Breakdown */}
       <section className="ai-card ai-breakdown-card">
         <h2 className="ai-section-title">Cost Breakdown</h2>
-
         <div className="ai-table">
           <div className="ai-table-header">
             <span>Item</span>
             <span>Cost</span>
           </div>
           <div className="ai-table-row">
-            <span>Box Cost (₹ per box × quantity)</span>
-            <span>{formatINR(data.costs.box)}</span>
+            <span>Box Cost ({stateProduct.recommendedBox} × {quantity})</span>
+            <span>{calculation ? formatINR(calculation.boxCost) : "Loading..."}</span>
           </div>
           <div className="ai-table-row">
-            <span>Protective Material Cost</span>
-            <span>{formatINR(data.costs.protective)}</span>
+            <span>Protective Material ({stateProduct.protectiveMaterial} × {quantity})</span>
+            <span>{calculation ? formatINR(calculation.protectiveCost) : "Loading..."}</span>
           </div>
           <div className="ai-table-row">
-            <span>Labor Cost</span>
-            <span>{formatINR(data.costs.labor)}</span>
+            <span>Total Labor Cost</span>
+            <span>{calculation ? formatINR(calculation.laborCost) : "Loading..."}</span>
           </div>
           <div className="ai-table-row">
-            <span>Shipping / Volumetric Weight Estimate</span>
-            <span>{formatINR(data.costs.shipping)}</span>
+            <span>Total Shipping Estimate</span>
+            <span>{calculation ? formatINR(calculation.shippingCost) : "Loading..."}</span>
           </div>
         </div>
 
-        {/* Total */}
         <div className="ai-total-box">
           <div className="ai-total-label">Total Estimated Packaging Cost</div>
-          <div className="ai-total-value">{formatINR(total)}</div>
-        </div>
-      </section>
-
-      {/* Additional Notes */}
-      <section className="ai-card ai-notes-card">
-        <h2 className="ai-section-title">Additional Notes</h2>
-
-        <div className="ai-notes-block">
-          <div className="ai-notes-label">Volumetric Weight Formula:</div>
-          <div className="ai-notes-formula">
-            Volumetric Weight (kg) = (Length × Width × Height in cm) / 5000
+          <div className="ai-total-value">
+            {calculation ? formatINR(calculation.total) : "₹0"}
           </div>
         </div>
-
-        <div className="ai-notes-block">
-          <div className="ai-notes-label">Packaging Category Notes:</div>
-          <ul className="ai-notes-list">
-            <li>Fragile items require additional cushioning and void fill.</li>
-            <li>Consider eco-friendly alternatives for bulk orders.</li>
-            <li>Optimize box dimensions to reduce shipping costs.</li>
-          </ul>
-        </div>
       </section>
 
-      {/* Footer Buttons */}
       <div className="ai-footer-actions">
-        
-        <button className="ai-primary-btn" onClick={handleConfirm}>
-          Confirm &amp; Save 
+        <button className="ai-primary-btn" onClick={() => {
+           alert(`Packaging cost for ${quantity} units saved!`);
+           navigate("/app/inventory");
+        }}>
+          Confirm &amp; Save Configuration
         </button>
       </div>
     </div>

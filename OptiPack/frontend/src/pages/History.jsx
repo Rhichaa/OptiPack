@@ -5,7 +5,7 @@ function History() {
   const [range, setRange] = useState("weekly");
   const [selectedPoint, setSelectedPoint] = useState(null);
 
-  // Trend data (dummy)
+  // Trend data (dummy) - kept as per note
   const dailyData = [
     { label: "Mon", value: 230 },
     { label: "Tue", value: 250 },
@@ -37,78 +37,25 @@ function History() {
     return weeklyData; // default weekly
   }, [range]);
 
-  // For SVG mapping: find min/max in activeData
   const minVal = Math.min(...activeData.map((d) => d.value));
   const maxVal = Math.max(...activeData.map((d) => d.value));
 
   const svgWidth = 300;
   const svgHeight = 120;
-  const bottom = 100; // baseline y
-  const top = 20; // top y
+  const bottom = 100; 
+  const top = 20; 
 
   const pointsString = activeData
     .map((d, idx) => {
-      const x =
-        (idx / (activeData.length - 1 || 1)) * svgWidth; // avoid div/0
+      const x = (idx / (activeData.length - 1 || 1)) * svgWidth;
       const norm = (d.value - minVal) / (maxVal - minVal || 1);
       const y = bottom - norm * (bottom - top);
       return `${x},${y}`;
     })
     .join(" ");
 
-  // Dummy table records
-  const records = [
-    {
-      datetime: "2023-10-26 10:30 AM",
-      product: "Wireless Bluetooth Earbuds",
-      box: "Box Type A (Small)",
-      material: "Bubble Wrap",
-      qty: 1,
-      packedBy: "John Doe",
-      aiUsed: true,
-      risk: "Low",
-    },
-    {
-      datetime: "2023-10-26 11:15 AM",
-      product: "4K Ultra HD Smart TV 55 inch",
-      box: "Box Type D (Large)",
-      material: "Foam Inserts",
-      qty: 1,
-      packedBy: "Jane Smith",
-      aiUsed: true,
-      risk: "Low",
-    },
-    {
-      datetime: "2023-10-26 01:00 PM",
-      product: "Portable SSD 1TB USB-C",
-      box: "Mailer Envelope",
-      material: "None",
-      qty: 3,
-      packedBy: "Peter Jones",
-      aiUsed: false,
-      risk: "Medium",
-    },
-    {
-      datetime: "2023-10-26 02:30 PM",
-      product: "Ergonomic Office Chair Deluxe",
-      box: "Custom Box (Oversized)",
-      material: "Cardboard Dividers",
-      qty: 1,
-      packedBy: "Alice Brown",
-      aiUsed: true,
-      risk: "High",
-    },
-    {
-      datetime: "2023-10-26 03:30 PM",
-      product: "Espresso Machine Pro",
-      box: "Box Type C (Medium)",
-      material: "Compostable Peanuts",
-      qty: 1,
-      packedBy: "John Doe",
-      aiUsed: true,
-      risk: "Low",
-    },
-  ];
+  // Dummy table records removed as requested
+  const records = []; 
 
   return (
     <div className="hist-page">
@@ -116,31 +63,24 @@ function History() {
 
       {/* TOP ROW */}
       <div className="hist-top-row">
-        {/* Chart Card */}
         <div className="hist-card chart-card">
           <div className="hist-card-header">
             <h2 className="hist-card-title">Time-Based Packaging Trends</h2>
             <div className="hist-range-tabs">
               <button
-                className={
-                  range === "daily" ? "range-btn active" : "range-btn"
-                }
+                className={range === "daily" ? "range-btn active" : "range-btn"}
                 onClick={() => setRange("daily")}
               >
                 Daily
               </button>
               <button
-                className={
-                  range === "weekly" ? "range-btn active" : "range-btn"
-                }
+                className={range === "weekly" ? "range-btn active" : "range-btn"}
                 onClick={() => setRange("weekly")}
               >
                 Weekly
               </button>
               <button
-                className={
-                  range === "monthly" ? "range-btn active" : "range-btn"
-                }
+                className={range === "monthly" ? "range-btn active" : "range-btn"}
                 onClick={() => setRange("monthly")}
               >
                 Monthly
@@ -149,35 +89,13 @@ function History() {
           </div>
 
           <div className="hist-chart-wrapper">
-            <svg
-              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-              className="hist-chart"
-            >
-              {/* X baseline */}
-              <line
-                x1="0"
-                y1={bottom}
-                x2={svgWidth}
-                y2={bottom}
-                stroke="#e5e7eb"
-                strokeWidth="1"
-              />
-
-              {/* Line */}
-              <polyline
-                fill="none"
-                stroke="#3b82f6"
-                strokeWidth="2"
-                points={pointsString}
-              />
-
-              {/* Points (clickable) */}
+            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="hist-chart">
+              <line x1="0" y1={bottom} x2={svgWidth} y2={bottom} stroke="#e5e7eb" strokeWidth="1" />
+              <polyline fill="none" stroke="#3b82f6" strokeWidth="2" points={pointsString} />
               {activeData.map((d, idx) => {
-                const x =
-                  (idx / (activeData.length - 1 || 1)) * svgWidth;
+                const x = (idx / (activeData.length - 1 || 1)) * svgWidth;
                 const norm = (d.value - minVal) / (maxVal - minVal || 1);
                 const y = bottom - norm * (bottom - top);
-
                 return (
                   <circle
                     key={d.label}
@@ -186,39 +104,28 @@ function History() {
                     r={4}
                     fill="#3b82f6"
                     style={{ cursor: "pointer" }}
-                    onClick={() =>
-                      setSelectedPoint({ label: d.label, value: d.value })
-                    }
+                    onClick={() => setSelectedPoint({ label: d.label, value: d.value })}
                   />
                 );
               })}
             </svg>
-
             <div className="hist-chart-legend">
               <span className="legend-dot" /> Total Packages
             </div>
-
             {selectedPoint && (
               <div className="hist-selected-point">
-                Selected:{" "}
-                <span>{selectedPoint.label}</span> –{" "}
-                <span>{selectedPoint.value}</span> packages
+                Selected: <span>{selectedPoint.label}</span> – <span>{selectedPoint.value}</span> packages
               </div>
             )}
           </div>
         </div>
 
-        {/* AI Insights Card */}
         <div className="hist-card insights-card">
           <h2 className="hist-card-title">AI Acceptance Insights</h2>
-
           <div className="hist-insight-main">
-            <div className="hist-insight-label">
-              AI Recommendation Acceptance Rate:
-            </div>
+            <div className="hist-insight-label">AI Recommendation Acceptance Rate:</div>
             <div className="hist-insight-value">89%</div>
           </div>
-
           <div className="hist-insight-row">
             <span>Accepted Recommendations:</span>
             <span>3210</span>
@@ -239,13 +146,9 @@ function History() {
         <div className="hist-card-header">
           <h2 className="hist-card-title">Packaging Records</h2>
           <div className="hist-pagination">
-            <button className="page-btn" disabled>
-              &lt; Previous
-            </button>
+            <button className="page-btn" disabled>&lt; Previous</button>
             <span className="page-indicator">1 / 1</span>
-            <button className="page-btn" disabled>
-              Next &gt;
-            </button>
+            <button className="page-btn" disabled>Next &gt;</button>
           </div>
         </div>
 
@@ -258,42 +161,33 @@ function History() {
                 <th>Box Used</th>
                 <th>Protective Material Used</th>
                 <th>Qty</th>
-                <th>Packed By</th>
+                {/* Packed By and Risk Level columns removed */}
                 <th>AI Used?</th>
-                <th>Risk Level</th>
               </tr>
             </thead>
             <tbody>
-              {records.map((r, idx) => (
-                <tr key={idx}>
-                  <td>{r.datetime}</td>
-                  <td>{r.product}</td>
-                  <td>{r.box}</td>
-                  <td>{r.material}</td>
-                  <td>{r.qty}</td>
-                  <td>{r.packedBy}</td>
-                  <td>
-                    <span
-                      className={r.aiUsed ? "pill pill-yes" : "pill pill-no"}
-                    >
-                      {r.aiUsed ? "Yes" : "No"}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={
-                        r.risk === "Low"
-                          ? "pill pill-low"
-                          : r.risk === "Medium"
-                          ? "pill pill-medium"
-                          : "pill pill-high"
-                      }
-                    >
-                      {r.risk}
-                    </span>
+              {records.length > 0 ? (
+                records.map((r, idx) => (
+                  <tr key={idx}>
+                    <td>{r.datetime}</td>
+                    <td>{r.product}</td>
+                    <td>{r.box}</td>
+                    <td>{r.material}</td>
+                    <td>{r.qty}</td>
+                    <td>
+                      <span className={r.aiUsed ? "pill pill-yes" : "pill pill-no"}>
+                        {r.aiUsed ? "Yes" : "No"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
+                    No records found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

@@ -1,4 +1,76 @@
 import "../styles/packages.css";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+
+function ProductAnalysis() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const product = location.state?.product;
+
+  const handleNext = () => {
+    if (!product) {
+      navigate("/app/product-details");
+      return;
+    }
+    navigate("/app/manual-entry", { state: { product } });
+  };
+
+  return (
+    <div className="page-wrapper">
+      <h1 className="page-title">Product Analysis</h1>
+
+      <div className="analysis-card">
+        <h2 className="section-title">Auto-Extracted Product Details</h2>
+
+        {!product ? (
+          <p className="analysis-text error">
+            No product data found. Please analyze again.
+          </p>
+        ) : (
+          <div className="analysis-grid">
+            <div className="analysis-item">
+              <span className="label">Product Name:</span>
+              <span className="value">{product.name}</span>
+            </div>
+
+            <div className="analysis-item">
+              <span className="label">Dimensions:</span>
+              <span className="value">{product.dimensions}</span>
+            </div>
+
+            <div className="analysis-item">
+              <span className="label">Weight:</span>
+              <span className="value">{product.weight}</span>
+            </div>
+
+            <div className="analysis-item">
+              <span className="label">Fragility:</span>
+              <span className="value">{product.fragility}</span>
+            </div>
+
+            <div className="analysis-item">
+              <span className="label">Category:</span>
+              <span className="value">{product.category}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="analysis-actions">
+          <Link to="/app/product-details" className="btn-outline">
+            ← Back
+          </Link>
+
+          <button className="btn-primary" onClick={handleNext}>
+            Proceed to Recommendations →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ProductAnalysis;
+
+/*import "../styles/packages.css";
 import { Link, useNavigate } from "react-router-dom";
 
 function ProductAnalysis() {
@@ -56,4 +128,4 @@ function ProductAnalysis() {
   );
 }
 
-export default ProductAnalysis;
+export default ProductAnalysis;*/

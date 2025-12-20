@@ -8,14 +8,17 @@ namespace OptiPackBackend.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        public DbSet<User> Users => Set<User>();
+        public DbSet<User> Users { get; set; }
         public DbSet<Product> Products => Set<Product>();
         public DbSet<Box> Boxes => Set<Box>();
         public DbSet<ProtectiveMaterial> ProtectiveMaterials => Set<ProtectiveMaterial>();
         public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
-       //ublic DbSet<PackageHistory> PackageHistories => Set<PackageHistory>();
+        public DbSet<ProductMaster> ProductMaster { get; set; }
+       //public DbSet<PackageHistory> PackageHistories => Set<PackageHistory>();
        public DbSet<PackageHistory> PackageHistories { get; set; }
-       public DbSet<ProductMaster> ProductMaster { get; set; }
+      
+        public DbSet<UserSettings> UserSettings { get; set; }
+        public DbSet<PackagingInventory>  PackagingInventory { get; set;}
 
         public DbSet<Recommendation> Recommendations => Set<Recommendation>();
 
