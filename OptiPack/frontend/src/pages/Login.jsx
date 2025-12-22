@@ -38,13 +38,24 @@ function Login() {
 
       console.log("Login success:", res.data);
 
+      // --- CRITICAL UPDATES START HERE ---
+      // 1. Save the authentication token
       localStorage.setItem("token", res.data.token);
+
+      // 2. Save the User ID (checking common backend property names: id or userId)
+      // This ensures UserProfile.jsx can find the data without a 404 error
+      const userId = res.data.id || res.data.userId;
+      if (userId) {
+          localStorage.setItem("userId", userId);
+      } else {
+          console.warn("Backend login successful but no User ID returned. Check backend response.");
+      }
+      // --- CRITICAL UPDATES END HERE ---
 
       navigate("/app");
     } catch (err) {
       console.error(err);
 
-      // Prevent React crash:
       const backendMsg =
         err.response?.data?.title ||
         err.response?.data ||
@@ -161,7 +172,6 @@ function Login() {
 }
 
 export default Login;
-
 
 
 

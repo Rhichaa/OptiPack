@@ -21,17 +21,34 @@ namespace OptiPackBackend.Controllers
             return Ok(new { user.Id, user.FullName, user.Email, user.Phone, user.CreatedAt, user.LastLogin });
         }
 
+        // Updated to handle 405 and 400 errors
         [HttpPost("{id}/edit")]
-        public async Task<IActionResult> Edit(int id, [FromBody] dynamic model)
+        public async Task<IActionResult> Edit(int id, [FromBody] UserUpdateModel model)
         {
             var user = await _db.Users.FindAsync(id);
-            if (user == null) return NotFound();
-            user.FullName = model.fullName ?? user.FullName;
-            user.Phone = model.phone ?? user.Phone;
+            if (user == null) return NotFound(new { message = "User not found" });
+
+            // Update only provided fields
+            if (!string.IsNullOrEmpty(model.FullName)) user.FullName = model.FullName;
+            if (!string.IsNullOrEmpty(model.Phone)) user.Phone = model.Phone;
+
             await _db.SaveChangesAsync();
-            return Ok();
+
+            // Return updated data to prevent frontend syntax errors
+            return Ok(new { 
+                user.Id, 
+                user.FullName, 
+                user.Phone, 
+                message = "Update successful" 
+            });
         }
     }
+
+    // Model to match incoming JSON keys exactly
+    public class UserUpdateModel
+    {
+        public string? FullName { get; set; }
+        public string? Phone { get; set; }
+        public string? Email { get; set; }
+    }
 }
-
-

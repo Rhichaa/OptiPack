@@ -108,3 +108,39 @@
   font-size: 14px;
   cursor: pointer;
 }
+/* Styling for inputs during Edit mode */
+.profile-input {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 300px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.profile-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* Save button variant */
+.save-profile-btn {
+  background-color: #10b981; /* Green color for saving */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-profile-btn:hover {
+  background-color: #059669;
+}
+
+/* Non-editable values */
+.gray-out {
+  color: #9ca3af;
+}

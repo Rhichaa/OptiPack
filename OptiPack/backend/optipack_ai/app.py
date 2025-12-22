@@ -7,7 +7,6 @@ import pyodbc
 
 app = FastAPI()
 
-# 1. ENHANCED CORS: Ensures React can send files to Python
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,7 +26,7 @@ def get_db_connection():
         f"Driver={{ODBC Driver 17 for SQL Server}};"
         f"Server={DB_CONFIG['server']};"
         f"Database={DB_CONFIG['database']};"
-        "Trusted_Connection=yes;"
+        f"Trusted_Connection=yes;"
     )
     return pyodbc.connect(conn_str)
 
@@ -40,29 +39,32 @@ def get_model():
         model = YOLO("yolov8n.pt")
     return model
 
+# --- SMART WEIGHT ESTIMATOR (Matches YOLO's 80 classes) ---
+def estimate_data(label):
+    # Standard data for the most common YOLO classes
+    knowledge_base = {
+        "mouse": {"w": 0.1, "dim": (12, 6, 4), "f": "Low"},
+        "laptop": {"w": 2.2, "dim": (35, 24, 2), "f": "High"},
+        "bottle": {"w": 1.0, "dim": (7, 7, 25), "f": "Medium"},
+        "cup": {"w": 0.3, "dim": (10, 10, 12), "f": "High"},
+        "cell phone": {"w": 0.2, "dim": (16, 8, 1), "f": "High"},
+        "remote": {"w": 0.15, "dim": (20, 5, 3), "f": "Medium"},
+        "keyboard": {"w": 0.7, "dim": (44, 14, 3), "f": "Medium"}
+    }
+    return knowledge_base.get(label.lower(), {"w": 1.0, "dim": (20, 15, 10), "f": "Medium"})
+
 # --- RECOMMENDATION LOGIC ---
-def hybrid_ai_recommend(product):
-    # Ensure all values are cast to numbers to prevent logic errors
-    length = float(product.get("Length", 20))
-    width = float(product.get("Width", 10))
-    height = float(product.get("Height", 8))
+def hybrid_ai_recommend(product, is_estimated=False):
+    length, width, height = product.get("Length"), product.get("Width"), product.get("Height")
     weight = float(product.get("Weight", 1.0))
     fragility = str(product.get("Fragility", "Medium")).lower()
-
     volume = length * width * height
 
-    # Logic for Packaging
     if volume < 3000: box = "Small Box"
     elif volume < 12000: box = "Medium Box"
     else: box = "Large Box"
 
-    if "high" in fragility:
-        material, risk = "Bubble Wrap (3 layers)", 40
-    elif "medium" in fragility:
-        material, risk = "Foam Sheets", 25
-    else:
-        material, risk = "Paper Cushioning", 10
-
+    material = "Bubble Wrap (3 layers)" if "high" in fragility else "Foam Sheets" if "medium" in fragility else "Paper"
     vehicle = "Mini Truck" if weight > 10 else "Van" if weight > 2 else "Bike"
 
     return {
@@ -70,81 +72,60 @@ def hybrid_ai_recommend(product):
         "protectiveMaterials": material,
         "vehicleType": vehicle,
         "packagingLayers": 3 if "high" in fragility else 1,
-        "damageRiskScore": risk,
-        "aiConfidenceScore": 92
+        "damageRiskScore": 40 if "high" in fragility else 15,
+        "aiConfidenceScore": 75 if is_estimated else 95 
     }
 
-# --- MAIN API ENDPOINT ---
 @app.post("/analyze")
 async def analyze_image(image: UploadFile = File(...)):
-    # STEP 1: Incoming Request
-    print(f"\n>>> [STEP 1] Received Request: {image.filename}")
-    
+    print(f"\n>>> Analyzing: {image.filename}")
     contents = await image.read()
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-    # STEP 2: YOLO Detection
     results = get_model()(img)[0]
     detected_label = "unknown"
+    is_estimated = True
+    
+    # Default fallback specs
+    specs = {"Length": 20, "Width": 15, "Height": 10, "Weight": 1.0, "Fragility": "Medium"}
+
     if len(results.boxes) > 0:
         cls_id = int(results.boxes[0].cls[0])
         detected_label = results.names[cls_id]
-        print(f">>> [STEP 2] YOLO detected: {detected_label}")
-    else:
-        print(">>> [STEP 2] YOLO detected: NOTHING")
+        
+        # Pull "Smart Guess" if DB fails
+        smart_guess = estimate_data(detected_label)
+        specs.update({
+            "Weight": smart_guess["w"], "Length": smart_guess["dim"][0],
+            "Width": smart_guess["dim"][1], "Height": smart_guess["dim"][2],
+            "Fragility": smart_guess["f"]
+        })
 
-    # STEP 3: Database Lookup
+    # DATABASE LOOKUP
     db_matched_product = None
-    specs_for_ai = {"Length": 20, "Width": 10, "Height": 8, "Weight": 1.0, "Fragility": "Medium"}
-
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        # Using LIKE allows "bottle" to match "Water Bottle 1L"
-        query = "SELECT ProductName, Category, Weight, Length, Width, Height, Fragility FROM ProductMaster WHERE ProductName LIKE ?"
+        query = "SELECT ProductName, Category, Weight, Length, Width, Height, Fragility FROM ProductMaster WHERE LOWER(ProductName) LIKE LOWER(?)"
         cursor.execute(query, (f"%{detected_label}%",))
         row = cursor.fetchone()
         
         if row:
-            print(f">>> [STEP 3] DB Match Found: {row[0]}")
-            # Casting to standard Python types for JSON compatibility
+            is_estimated = False
             db_matched_product = {
-                "productName": str(row[0]),
-                "category": str(row[1]),
-                "weightKg": float(row[2]),
-                "lengthCm": float(row[3]),
-                "widthCm": float(row[4]),
-                "heightCm": float(row[5]),
+                "productName": str(row[0]), "category": str(row[1]),
+                "weightKg": float(row[2]), "lengthCm": float(row[3]),
+                "widthCm": float(row[4]), "heightCm": float(row[5]),
                 "fragilityLevel": str(row[6])
             }
-            specs_for_ai = {
-                "Length": float(row[3]), "Width": float(row[4]), "Height": float(row[5]), 
-                "Weight": float(row[2]), "Fragility": str(row[6])
-            }
-        else:
-            print(f">>> [STEP 3] No DB match found for '{detected_label}'. Using defaults.")
-        
+            specs.update({"Length": float(row[3]), "Width": float(row[4]), "Height": float(row[5]), "Weight": float(row[2]), "Fragility": str(row[6])})
         conn.close()
-    except Exception as e:
-        print(f">>> [ERROR] Database failure: {str(e)}")
+    except: pass # Fallback to smart_guess if DB fails
 
-    # STEP 4: Generate Recommendation
-    recommendation = hybrid_ai_recommend(specs_for_ai)
-    print(">>> [STEP 4] Analysis Successful. Sending Data.")
-
-    return {
-        "label": detected_label,
-        "dbMatchedProduct": db_matched_product,
-        "recommendation": recommendation
-    }
-
-@app.get("/")
-def root():
-    return {"status": "Running", "db": "Connected"}
+    recommendation = hybrid_ai_recommend(specs, is_estimated)
+    return {"label": detected_label, "dbMatchedProduct": db_matched_product, "recommendation": recommendation, "isEstimated": is_estimated}
 
 if __name__ == "__main__":
     import uvicorn
-    # Make sure port 5001 is used
     uvicorn.run(app, host="127.0.0.1", port=5001)

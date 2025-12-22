@@ -10,14 +10,9 @@ function AICostEstimation() {
   const location = useLocation();
   const navigate = useNavigate();
   const [inventory, setInventory] = useState([]);
-  
-  // New state for dynamic quantity
   const [quantity, setQuantity] = useState(1);
-  
-  // 1. Get the real AI product data from ProductDetails
   const stateProduct = location.state?.product;
 
-  // 2. Fetch Inventory for live pricing
   useEffect(() => {
     const fetchInventory = async () => {
       try {
@@ -27,33 +22,27 @@ function AICostEstimation() {
           setInventory(data);
         }
       } catch (error) {
-        console.error("Error fetching inventory for pricing:", error);
+        console.error("Error fetching inventory:", error);
       }
     };
     fetchInventory();
   }, []);
 
-  // 3. Logic to match AI recommendations with Inventory costs
   const calculation = useMemo(() => {
     if (!stateProduct || inventory.length === 0) return null;
 
-    // Match recommendation name with inventory materialName
-    const boxItem = inventory.find(i => 
-      i.materialName.toLowerCase() === stateProduct.recommendedBox.toLowerCase()
-    );
+    const findItem = (id) => inventory.find(i => i.materialId?.toLowerCase() === id?.toLowerCase() || i.materialName?.toLowerCase() === id?.toLowerCase());
 
-    const materialItem = inventory.find(i => 
-      i.materialName.toLowerCase() === stateProduct.protectiveMaterial.toLowerCase()
-    );
+    const boxItem = findItem(stateProduct.recommendedBox);
+    const materialItem = findItem(stateProduct.protectiveMaterial);
 
     const boxUnitPrice = boxItem ? boxItem.cost : 0;
     const materialUnitPrice = materialItem ? materialItem.cost : 0;
     
-    // Calculate totals based on the dynamic quantity state
     const boxTotal = boxUnitPrice * quantity;
     const materialTotal = materialUnitPrice * quantity;
-    const labor = 15 * quantity; // Assuming ₹15 labor per unit
-    const shipping = 50 * quantity; // Assuming ₹50 shipping per unit
+    const labor = 15 * quantity; 
+    const shipping = 50 * quantity; 
 
     return {
       boxCost: boxTotal,
@@ -62,10 +51,49 @@ function AICostEstimation() {
       shippingCost: shipping,
       total: boxTotal + materialTotal + labor + shipping
     };
-  }, [stateProduct, inventory, quantity]); // recalculates when quantity changes
+  }, [stateProduct, inventory, quantity]);
+
+  const handleConfirm = async () => {
+    if (!calculation || !stateProduct) return;
+
+    // Payload updated to include Weight and Dimensions for History
+    const historyData = {
+      ProductName: stateProduct.name,
+      ProductId: 0, 
+      BoxUsed: stateProduct.recommendedBox,
+      ProtectiveMaterials: stateProduct.protectiveMaterial, 
+      Cost: Number(calculation.total.toFixed(2)),
+      AiUsed: stateProduct.aiUsed || "Yes",
+      PackedAt: new Date().toISOString() 
+    };
+
+    try {
+      const response = await fetch("https://localhost:49331/api/History/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(historyData),
+      });
+
+      if (response.ok) {
+        alert(`Packaging record for ${stateProduct.name} saved successfully!`);
+        navigate("/app/history"); 
+      } else {
+        const errorMsg = await response.text();
+        console.error("Server Error:", errorMsg);
+        alert("Failed to save to history. Check console for details."); 
+      }
+    } catch (error) {
+      console.error("Error saving history:", error);
+    }
+  };
 
   if (!stateProduct) {
-    return <div className="ai-cost-page"><h2>No product data found. Please analyze an image first.</h2></div>;
+    return (
+      <div className="ai-cost-page">
+        <h2>No product data found. Please analyze an image first.</h2>
+        <button onClick={() => navigate("/app/product-details")}>Go Back</button>
+      </div>
+    );
   }
 
   return (
@@ -77,7 +105,6 @@ function AICostEstimation() {
         </button>
       </div>
 
-      {/* Product & Packaging Summary */}
       <section className="ai-card ai-summary-card">
         <h2 className="ai-section-title">Product &amp; Packaging Summary</h2>
         <div className="ai-summary-grid">
@@ -90,7 +117,10 @@ function AICostEstimation() {
               <span>Dimensions:</span>
               <strong>{stateProduct.dimensions}</strong>
             </div>
-            {/* NEW QUANTITY INPUT FIELD */}
+            <div className="ai-summary-item">
+              <span>Weight:</span>
+              <strong>{stateProduct.weight}</strong>
+            </div>
             <div className="ai-summary-item">
               <span>Quantity to Pack:</span>
               <input 
@@ -117,7 +147,6 @@ function AICostEstimation() {
         </div>
       </section>
 
-      {/* Cost Breakdown */}
       <section className="ai-card ai-breakdown-card">
         <h2 className="ai-section-title">Cost Breakdown</h2>
         <div className="ai-table">
@@ -152,12 +181,18 @@ function AICostEstimation() {
       </section>
 
       <div className="ai-footer-actions">
-        <button className="ai-primary-btn" onClick={() => {
-           alert(`Packaging cost for ${quantity} units saved!`);
-           navigate("/app/inventory");
-        }}>
+        <button className="ai-primary-btn" onClick={handleConfirm}>
           Confirm &amp; Save Configuration
         </button>
+        {!stateProduct.isManual && (
+          <button 
+            className="ai-primary-btn" 
+            style={{ marginLeft: '10px', backgroundColor: '#6c757d' }} 
+            onClick={() => navigate("/app/manual-override", { state: { product: stateProduct } })}
+          >
+            Manual Override
+          </button>
+        )}
       </div>
     </div>
   );

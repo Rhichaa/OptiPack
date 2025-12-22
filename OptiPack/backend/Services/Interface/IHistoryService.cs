@@ -8,5 +8,6 @@ namespace OptiPackBackend.Services.Interfaces
     {
         Task LogPackagingAsync(PackageHistory history);
         Task<List<PackageHistory>> GetRecentHistoryAsync(int count = 50);
+        Task<object> GetHistoryAnalyticsAsync();
     }
 }

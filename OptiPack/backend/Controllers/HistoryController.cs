@@ -15,6 +15,9 @@ namespace OptiPackBackend.Controllers
         [HttpGet("recent")]
         public async Task<IActionResult> Recent() => Ok(await _hist.GetRecentHistoryAsync(50));
 
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics() => Ok(await _hist.GetHistoryAnalyticsAsync());
+
         [HttpPost("log")]
         public async Task<IActionResult> Log([FromBody] PackageHistory history)
         {

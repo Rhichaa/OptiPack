@@ -4,205 +4,118 @@ import { useNavigate } from "react-router-dom";
 
 function Settings() {
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
 
-  // UI state
   const [notifications, setNotifications] = useState(true);
-  const [theme, setTheme] = useState("system"); // 'light' | 'dark' | 'system'
-  const [themePreview, setThemePreview] = useState("system");
-
-  // Password change fields
   const [currentPwd, setCurrentPwd] = useState("");
   const [newPwd, setNewPwd] = useState("");
   const [confirmPwd, setConfirmPwd] = useState("");
   const [pwdMsg, setPwdMsg] = useState("");
 
-  // Load settings from localStorage on mount
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("optipack_settings") || "{}");
     if (saved.notifications !== undefined) setNotifications(!!saved.notifications);
-    if (saved.theme) {
-      setTheme(saved.theme);
-      setThemePreview(saved.theme);
-      applyTheme(saved.theme);
-    }
   }, []);
 
-  // helper: apply theme to document (light/dark)
-  function applyTheme(value) {
-    // 'system' = remove explicit class; let OS/browser decide
-    const root = document.documentElement;
-    root.classList.remove("theme-light", "theme-dark");
-    if (value === "light") root.classList.add("theme-light");
-    else if (value === "dark") root.classList.add("theme-dark");
+  async function handleSaveSettings() {
+    // Payload now only sends userId and notifications
+    const payload = { userId: parseInt(userId), notifications };
+    try {
+      const response = await fetch(`https://localhost:49331/api/Auth/save-settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        localStorage.setItem("optipack_settings", JSON.stringify(payload));
+        alert("Settings synced successfully.");
+      }
+    } catch (err) {
+      alert("Error saving settings.");
+    }
   }
 
-  // Save settings to localStorage (replace with API call later)
-  function handleSaveSettings() {
-    const payload = { notifications, theme };
-    localStorage.setItem("optipack_settings", JSON.stringify(payload));
-    applyTheme(theme);
-    setThemePreview(theme);
-    alert("Settings saved.");
-    // TODO: call backend API: axios.post('/api/user/settings', payload)
-  }
-
-  function handleResetSettings() {
-    setNotifications(true);
-    setTheme("system");
-    setThemePreview("system");
-    localStorage.removeItem("optipack_settings");
-    applyTheme("system");
-  }
-
-  // Password change (client-side demo; hook to API)
   async function handleChangePassword(e) {
     e.preventDefault();
     setPwdMsg("");
-    if (!currentPwd || !newPwd || !confirmPwd) {
-      setPwdMsg("Please fill all password fields.");
-      return;
-    }
-    if (newPwd.length < 6) {
-      setPwdMsg("New password must be at least 6 characters.");
-      return;
-    }
+
     if (newPwd !== confirmPwd) {
-      setPwdMsg("New password and confirm password do not match.");
+      setPwdMsg("Error: Passwords do not match.");
       return;
     }
 
-    // Demo response - replace with backend call
     try {
-      // Example:
-      // await axios.post('/api/auth/change-password', { currentPwd, newPwd });
-      setPwdMsg("Password changed successfully (demo).");
-      setCurrentPwd("");
-      setNewPwd("");
-      setConfirmPwd("");
+      const response = await fetch(`https://localhost:49331/api/Auth/change-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          currentPassword: currentPwd,
+          newPassword: newPwd
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setPwdMsg("Success: Password updated!");
+        setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+      } else {
+        setPwdMsg(`Error: ${data.message}`);
+      }
     } catch (err) {
-      console.error(err);
-      setPwdMsg("Failed to change password. Try again.");
+      setPwdMsg("Error: Server unreachable.");
     }
   }
 
   return (
-    <div className="settings-page">
+    <div className="settings-container">
       <div className="settings-header">
-        <h1>Settings</h1>
-        <div className="settings-actions">
-          <button className="btn-outline" onClick={() => navigate("/app")}>
-            ← Back to Dashboard
-          </button>
+        <div>
+          <h1>Settings</h1>
+          <p className="subtitle">Manage preferences and security</p>
         </div>
+        <button className="back-btn" onClick={() => navigate("/app")}>← Back</button>
       </div>
 
       <div className="settings-grid">
-        {/* Left column: General */}
         <section className="settings-card">
-          <h2>General</h2>
-
-          <div className="setting-row">
-            <label>Notifications</label>
-            <div className="toggle-wrapper">
-              <button
-                className={`toggle ${notifications ? "on" : "off"}`}
-                onClick={() => setNotifications((s) => !s)}
-                aria-pressed={notifications}
-              >
-                <span className="toggle-knob" />
-                <span className="toggle-label">{notifications ? "On" : "Off"}</span>
+          <div className="card-header"><h2>General</h2></div>
+          <div className="card-body">
+            <div className="setting-item">
+              <div className="setting-info">
+                <label>Notifications</label>
+                <p>Receive inventory alerts</p>
+              </div>
+              <button className={`custom-toggle ${notifications ? "on" : "off"}`} onClick={() => setNotifications(!notifications)}>
+                <span className="toggle-slider" />
               </button>
             </div>
+            {/* Theme section removed from here */}
           </div>
-
-          <div className="setting-row">
-            <label>Theme / Appearance</label>
-            <div className="theme-options">
-              <label>
-                <input
-                  type="radio"
-                  name="theme"
-                  value="system"
-                  checked={theme === "system"}
-                  onChange={() => setTheme("system")}
-                />
-                System
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="theme"
-                  value="light"
-                  checked={theme === "light"}
-                  onChange={() => setTheme("light")}
-                />
-                Light
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="theme"
-                  value="dark"
-                  checked={theme === "dark"}
-                  onChange={() => setTheme("dark")}
-                />
-                Dark
-              </label>
-            </div>
-
-          </div>
-
-          <div className="settings-card-footer">
-            <button className="btn-secondary" onClick={handleResetSettings}>
-              Reset to Defaults
-            </button>
-            <button className="btn-primary" onClick={handleSaveSettings}>
-              Save Settings
-            </button>
+          <div className="card-footer">
+            <button className="save-btn" onClick={handleSaveSettings}>Save Settings</button>
           </div>
         </section>
 
-        {/* Right column: Security */}
         <section className="settings-card">
-          <h2>Security</h2>
-          
-
-          <form className="pwd-form" onSubmit={handleChangePassword}>
-            <label className="form-label">Current Password</label>
-            <input
-              type="password"
-              value={currentPwd}
-              onChange={(e) => setCurrentPwd(e.target.value)}
-              className="form-input"
-            />
-
-            <label className="form-label">New Password</label>
-            <input
-              type="password"
-              value={newPwd}
-              onChange={(e) => setNewPwd(e.target.value)}
-              className="form-input"
-            />
-
-            <label className="form-label">Confirm New Password</label>
-            <input
-              type="password"
-              value={confirmPwd}
-              onChange={(e) => setConfirmPwd(e.target.value)}
-              className="form-input"
-            />
-
-            {pwdMsg && <div className="pwd-msg">{pwdMsg}</div>}
-
-            <div className="pwd-actions">
-              <button type="button" className="btn-outline" onClick={() => {
-                setCurrentPwd(""); setNewPwd(""); setConfirmPwd(""); setPwdMsg("");
-              }}>
-                Reset
-              </button>
-              <button type="submit" className="btn-primary">
-                Change Password
-              </button>
+          <div className="card-header"><h2>Security</h2></div>
+          <form className="card-body pwd-form" onSubmit={handleChangePassword}>
+            <div className="input-group">
+              <label>Current Password</label>
+              <input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label>New Password</label>
+              <input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label>Confirm Password</label>
+              <input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} />
+            </div>
+            {pwdMsg && <div className={`status-msg ${pwdMsg.includes("Success") ? "success" : "error"}`}>{pwdMsg}</div>}
+            <div className="form-actions">
+              <button type="submit" className="change-pwd-btn">Change Password</button>
             </div>
           </form>
         </section>
@@ -212,3 +125,179 @@ function Settings() {
 }
 
 export default Settings;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*import { useEffect, useState } from "react";
+import "../styles/settings.css";
+import { useNavigate } from "react-router-dom";
+
+function Settings() {
+  const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
+
+  const [notifications, setNotifications] = useState(true);
+  const [theme, setTheme] = useState("system");
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdMsg, setPwdMsg] = useState("");
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("optipack_settings") || "{}");
+    if (saved.notifications !== undefined) setNotifications(!!saved.notifications);
+    if (saved.theme) {
+      setTheme(saved.theme);
+      applyTheme(saved.theme);
+    }
+  }, []);
+
+  function applyTheme(value) {
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+
+    if (value === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.classList.add(prefersDark ? "dark" : "light");
+    } else {
+      root.classList.add(value);
+    }
+  }
+
+  async function handleSaveSettings() {
+    const payload = { userId: parseInt(userId), notifications, theme };
+    try {
+      const response = await fetch(`https://localhost:49331/api/Auth/save-settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        applyTheme(theme);
+        localStorage.setItem("optipack_settings", JSON.stringify(payload));
+        alert("Settings synced successfully.");
+      }
+    } catch (err) {
+      alert("Error saving settings.");
+    }
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    setPwdMsg("");
+
+    if (newPwd !== confirmPwd) {
+      setPwdMsg("Error: Passwords do not match.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://localhost:49331/api/Auth/change-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: parseInt(userId),
+          currentPassword: currentPwd,
+          newPassword: newPwd
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setPwdMsg("Success: Password updated!");
+        setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+      } else {
+        setPwdMsg(`Error: ${data.message}`);
+      }
+    } catch (err) {
+      setPwdMsg("Error: Server unreachable.");
+    }
+  }
+
+  return (
+    <div className="settings-container">
+      <div className="settings-header">
+        <div>
+          <h1>Settings</h1>
+          <p className="subtitle">Manage preferences and security</p>
+        </div>
+        <button className="back-btn" onClick={() => navigate("/app")}>← Back</button>
+      </div>
+
+      <div className="settings-grid">
+        <section className="settings-card">
+          <div className="card-header"><h2>General</h2></div>
+          <div className="card-body">
+            <div className="setting-item">
+              <div className="setting-info">
+                <label>Notifications</label>
+                <p>Receive inventory alerts</p>
+              </div>
+              <button className={`custom-toggle ${notifications ? "on" : "off"}`} onClick={() => setNotifications(!notifications)}>
+                <span className="toggle-slider" />
+              </button>
+            </div>
+            <div className="setting-item vertical">
+              <label>Theme</label>
+              <div className="theme-selector">
+                {["system", "light", "dark"].map((t) => (
+                  <label key={t} className={`theme-tab ${theme === t ? "active" : ""}`}>
+                    <input type="radio" name="theme" value={t} checked={theme === t} onChange={() => setTheme(t)} />
+                    {t}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="card-footer">
+            <button className="save-btn" onClick={handleSaveSettings}>Save Settings</button>
+          </div>
+        </section>
+
+        <section className="settings-card">
+          <div className="card-header"><h2>Security</h2></div>
+          <form className="card-body pwd-form" onSubmit={handleChangePassword}>
+            <div className="input-group">
+              <label>Current Password</label>
+              <input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label>New Password</label>
+              <input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} />
+            </div>
+            <div className="input-group">
+              <label>Confirm Password</label>
+              <input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} />
+            </div>
+            {pwdMsg && <div className={`status-msg ${pwdMsg.includes("Success") ? "success" : "error"}`}>{pwdMsg}</div>}
+            <div className="form-actions">
+              <button type="submit" className="change-pwd-btn">Change Password</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+export default Settings;*/

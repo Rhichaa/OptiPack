@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
+// Professional icons for a cleaner look
+import { LayoutDashboard, Package, Lightbulb, Library, History, User, LogOut } from "lucide-react";
 
 function Sidebar() {
   const location = useLocation();
@@ -11,13 +13,13 @@ function Sidebar() {
       : "sidebar-item";
 
   const handleLogout = () => {
-    localStorage.clear(); // clears login/session data
-    navigate("/login");   // redirect to login page
+    localStorage.clear(); 
+    navigate("/login");   
   };
 
   return (
     <aside className="sidebar">
-      {/* TOP PART */}
+      {/* Container for top links */}
       <div className="sidebar-top">
         <div className="sidebar-logo">
           <span className="sidebar-logo-icon">🚀</span>
@@ -26,47 +28,47 @@ function Sidebar() {
 
         <nav className="sidebar-menu">
           <Link to="/dashboard" className={isActive("/dashboard")}>
-            <span className="sidebar-item-icon">🏠</span>
+            <LayoutDashboard size={18} className="sidebar-item-icon" />
             <span>Dashboard</span>
           </Link>
 
           <Link to="/packages" className={isActive("/packages")}>
-            <span className="sidebar-item-icon">📦</span>
+            <Package size={18} className="sidebar-item-icon" />
             <span>Packages</span>
           </Link>
 
           <Link to="/recommendations" className={isActive("/recommendations")}>
-            <span className="sidebar-item-icon">💡</span>
+            <Lightbulb size={18} className="sidebar-item-icon" />
             <span>Recommendations</span>
           </Link>
 
           <Link to="/inventory" className={isActive("/inventory")}>
-            <span className="sidebar-item-icon">📚</span>
+            <Library size={18} className="sidebar-item-icon" />
             <span>Inventory</span>
           </Link>
 
           <Link to="/history" className={isActive("/history")}>
-            <span className="sidebar-item-icon">🕒</span>
+            <History size={18} className="sidebar-item-icon" />
             <span>History</span>
           </Link>
 
           <Link to="/user-profile" className={isActive("/user-profile")}>
-            <span className="sidebar-item-icon">👤</span>
+            <User size={18} className="sidebar-item-icon" />
             <span>User Profile</span>
           </Link>
         </nav>
       </div>
 
-      {/* BOTTOM LOGOUT */}
+      {/* Logout button pinned to the bottom */}
       <div className="sidebar-logout">
         <button className="logout-btn" onClick={handleLogout}>
-          🚪 Logout
+          <LogOut size={18} />
+          <span>Logout</span>
         </button>
       </div>
     </aside>
   );
 }
-console.log("SIDEBAR LOADED");
 
 export default Sidebar;
 
@@ -81,60 +83,3 @@ export default Sidebar;
 
 
 
-
-/*import { Link, useLocation } from "react-router-dom";
-import "../styles/dashboard.css";
-
-function Sidebar() {
-  const location = useLocation();
-
-  const isActive = (path) =>
-    location.pathname === path ? "sidebar-item sidebar-item-active" : "sidebar-item";
-
-  return (
-    <aside className="sidebar">
-      <div>
-        <div className="sidebar-logo">
-          <span className="sidebar-logo-icon">🚀</span>
-          <span>OptiPack</span>
-        </div>
-
-        <nav className="sidebar-menu">
-          <Link to="/dashboard" className={isActive("/dashboard")}>
-            <span className="sidebar-item-icon">🏠</span>
-            <span>Dashboard</span>
-          </Link>
-
-          <Link to="/packages" className={isActive("/packages")}>
-            <span className="sidebar-item-icon">📦</span>
-            <span>Packages</span>
-          </Link>
-
-          <Link to="/recommendations" className={isActive("/recommendations")}>
-            <span className="sidebar-item-icon">💡</span>
-            <span>Recommendations</span>
-          </Link>
-
-          
-
-          <Link to="/inventory" className={isActive("/inventory")}>
-            <span className="sidebar-item-icon">📚</span>
-            <span>Inventory</span>
-          </Link>
-
-          <Link to="/history" className={isActive("/history")}>
-            <span className="sidebar-item-icon">🕒</span>
-            <span>History</span>
-          </Link>
-
-          <Link to="/user-profile" className={isActive("/user-profile")}>
-            <span className="sidebar-item-icon">👤</span>
-            <span>User Profile</span>
-          </Link>
-        </nav>
-      </div>
-    </aside>
-  );
-}
-
-export default Sidebar;*/

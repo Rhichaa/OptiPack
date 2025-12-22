@@ -41,7 +41,7 @@ namespace OptiPackBackend.Services.Implementations
             await _db.SaveChangesAsync();
 
             var token = GenerateJwt(user);
-            return new AuthResponseDto { Email = user.Email, Token = token };
+            return new AuthResponseDto { Email = user.Email, Token = token, Id = user.Id };
         }
 
         public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
@@ -55,7 +55,34 @@ namespace OptiPackBackend.Services.Implementations
             await _db.SaveChangesAsync();
 
             var token = GenerateJwt(user);
-            return new AuthResponseDto { Email = user.Email, Token = token };
+            return new AuthResponseDto { Email = user.Email, Token = token, Id = user.Id };
+        }
+
+        public async Task<bool> UpdateSettingsAsync(SettingsDto dto)
+        {
+            var user = await _db.Users.FindAsync(dto.UserId);
+            if (user == null) return false;
+
+            user.NotificationsEnabled = dto.Notifications;
+            user.PreferredTheme = dto.Theme;
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ChangePasswordAsync(ChangePasswordDto dto)
+        {
+            var user = await _db.Users.FindAsync(dto.UserId);
+            if (user == null) return false;
+
+            // Verify old password hash
+            if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.Password)) return false;
+
+            // Hash and save new password
+            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            
+            await _db.SaveChangesAsync();
+            return true;
         }
 
         private string GenerateJwt(User user)
@@ -63,7 +90,10 @@ namespace OptiPackBackend.Services.Implementations
             var secret = _config["Jwt:Key"] ?? "ReplaceWithSecureKey";
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var claims = new[] { new Claim(JwtRegisteredClaimNames.Sub, user.Email), new Claim("uid", user.Id.ToString()) };
+            var claims = new[] { 
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email), 
+                new Claim("uid", user.Id.ToString()) 
+            };
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],

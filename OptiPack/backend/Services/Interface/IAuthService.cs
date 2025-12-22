@@ -8,5 +8,8 @@ namespace OptiPackBackend.Services.Interfaces
     {
         Task<AuthResponseDto> RegisterAsync(RegisterDto dto);
         Task<AuthResponseDto?> LoginAsync(LoginDto dto);
+        Task<bool> UpdateSettingsAsync(SettingsDto dto);
+        // Added this line to match your Implementation
+        Task<bool> ChangePasswordAsync(ChangePasswordDto dto);
     }
 }

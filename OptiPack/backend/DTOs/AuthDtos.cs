@@ -17,5 +17,10 @@ namespace OptiPackBackend.DTOs
     {
         public string Token { get; set; } = "";
         public string Email { get; set; } = "";
+        public int Id { get; set; }
+
+        // Added for Settings integration
+        public string Theme { get; set; } = "system";
+        public bool Notifications { get; set; } = true;
     }
 }

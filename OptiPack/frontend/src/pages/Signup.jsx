@@ -1,140 +1,128 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/api";
-import "../styles/auth.css";
 import axios from "axios";
+import "../styles/auth.css";
 
 function Signup() {
   const navigate = useNavigate();
 
-  const [fullname, setFullname] = useState("");
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [formData, setFormData] = useState({
+    fullname: "",
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: ""
+  });
 
   const [error, setError] = useState("");
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
     try {
       const res = await axios.post("https://localhost:49331/api/Auth/register", {
-          fullname,
-          email,
-          username,
-          password,
-          avatarUrl: "",
-          role: "User",
+        fullname: formData.fullname,
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        avatarUrl: "",
+        role: "User",
       });
-
-
 
       if (res.status === 200) {
         alert("Registration successful!");
         navigate("/login");
       }
-
     } catch (err) {
       console.error(err);
-      setError(err.response?.data || "Registration failed");
+      setError(err.response?.data?.message || "Registration failed. Try again.");
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1 className="auth-title">OptiPack</h1>
-        <p className="auth-subtitle">Create your account to get started</p>
+        <h2 className="auth-title">Create Account</h2>
+        <p className="auth-subtitle">Join OptiPack to manage your inventory</p>
 
         <form className="auth-form" onSubmit={handleRegister}>
-
-          {/* Full Name */}
-          <div className="auth-field">
+          
+          <div className="input-group">
             <label>Full Name</label>
-            <div className="auth-input-wrapper">
-              <span className="auth-icon">👤</span>
-              <input
-                type="text"
-                className="auth-input"
-                value={fullname}
-                onChange={(e) => setFullname(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              name="fullname"
+              type="text"
+              placeholder="Enter your full name"
+              value={formData.fullname}
+              onChange={handleInputChange}
+              required
+            />
           </div>
 
-          {/* Username */}
-          <div className="auth-field">
+          <div className="input-group">
             <label>Username</label>
-            <div className="auth-input-wrapper">
-              <span className="auth-icon">👤</span>
-              <input
-                type="text"
-                className="auth-input"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              name="username"
+              type="text"
+              placeholder="Choose a username"
+              value={formData.username}
+              onChange={handleInputChange}
+              required
+            />
           </div>
 
-          {/* Email */}
-          <div className="auth-field">
-            <label>Email</label>
-            <div className="auth-input-wrapper">
-              <span className="auth-icon">📧</span>
-              <input
-                type="email"
-                className="auth-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <div className="input-group">
+            <label>Email Address</label>
+            <input
+              name="email"
+              type="email"
+              placeholder="name@company.com"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
           </div>
 
-          {/* Password */}
-          <div className="auth-field">
+          <div className="input-group">
             <label>Password</label>
-            <div className="auth-input-wrapper">
-              <span className="auth-icon">🔒</span>
-              <input
-                type="password"
-                className="auth-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+            />
           </div>
 
-          {/* Confirm Password */}
-          <div className="auth-field">
+          <div className="input-group">
             <label>Confirm Password</label>
-            <div className="auth-input-wrapper">
-              <span className="auth-icon">🔒</span>
-              <input
-                type="password"
-                className="auth-input"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              name="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              required
+            />
           </div>
 
-          {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text" style={{ color: 'red', fontSize: '14px', marginBottom: '10px' }}>{error}</p>}
 
-          <button className="auth-btn">Register</button>
+          <button type="submit" className="auth-btn">Register</button>
 
-          <p className="auth-footer-text">
+          <p className="auth-footer">
             Already have an account?{" "}
             <Link to="/login" className="auth-link">Login</Link>
           </p>

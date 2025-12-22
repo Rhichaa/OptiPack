@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace OptiPackBackend.Models
@@ -17,7 +18,11 @@ namespace OptiPackBackend.Models
 
         public string Phone { get; set; } = "";
 
+        // New fields for the Settings page
+        public bool NotificationsEnabled { get; set; } = true;
+        public string PreferredTheme { get; set; } = "system";
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime LastLogin { get; set; } = DateTime.UtcNow;
+        public DateTime? LastLogin { get; set; } // Nullable if they haven't logged in yet
     }
 }
